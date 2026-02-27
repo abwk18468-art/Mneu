@@ -101,13 +101,14 @@
         }
         .add-btn:active { background: var(--accent-wood); color: white; }
 
-        /* السلة الجانبية (بدون خطوط طولية) */
+        /* السلة الجانبية */
         .cart-sidebar { 
             position: fixed; top: 0; left: -100%; width: 300px; height: 100vh; 
             background: #0f0f0f; z-index: 3000; transition: 0.4s; padding: 20px; 
             border: none;
             box-shadow: 5px 0 15px rgba(0,0,0,0.5);
             display: flex; flex-direction: column; 
+            box-sizing: border-box;
         }
         .cart-sidebar.open { left: 0; }
         
@@ -117,6 +118,13 @@
         .cart-item {
             display: flex; justify-content: space-between; align-items: center;
             background: #1a1a1a; padding: 12px; border-radius: 10px; margin-bottom: 10px;
+        }
+
+        /* تنسيق حقول الإدخال الجديدة */
+        .order-input {
+            width: 100%; padding: 10px; margin-top: 10px; border-radius: 8px;
+            border: 1px solid #333; background: #222; color: #fff;
+            font-family: 'Cairo'; font-size: 0.9rem; box-sizing: border-box;
         }
 
         .whatsapp-btn { background: #27ae60; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; cursor: pointer; font-weight: bold; font-family: 'Cairo'; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
@@ -194,6 +202,12 @@
         <div class="close-cart-btn" onclick="toggleCart()">&times;</div>
         <h3 style="color:var(--accent-wood); border-bottom:1px solid #333; padding-bottom:10px; text-align:center;">قائمة الطلبات</h3>
         <div id="cart-content"></div>
+        
+        <div id="user-info" style="margin-top:10px; border-top:1px solid #333; padding-top:10px;">
+            <input type="tel" id="userPhone" class="order-input" placeholder="رقم الهاتف">
+            <textarea id="userAddress" class="order-input" placeholder="العنوان (المنطقة / رقم الدار)" rows="2"></textarea>
+        </div>
+
         <div style="border-top:2px solid #333; padding-top:15px;">
             <p style="display:flex; justify-content:space-between; font-weight:bold;"><span>الإجمالي:</span><span style="color:var(--accent-wood)"><span id="total-price">0</span> د.ع</span></p>
             <button class="whatsapp-btn" onclick="sendOrder()"><i class="fab fa-whatsapp"></i> إرسال عبر واتساب</button>
@@ -226,7 +240,6 @@
             total += price;
             itemCount += 1;
             renderCart();
-            // تلميح للزبون عند إضافة أول وجبة
             if(itemCount === 1) {
                 const btn = document.querySelector('.cart-icon-nav');
                 btn.style.borderColor = "#fff";
@@ -262,9 +275,25 @@
 
         function sendOrder() {
             if (Object.keys(cart).length === 0) return alert('السلة فارغة!');
+            
+            // جلب بيانات العميل
+            const phone = document.getElementById('userPhone').value;
+            const address = document.getElementById('userAddress').value;
+
+            if(!phone || !address) {
+                return alert('يرجى كتابة رقم الهاتف والعنوان لتأكيد الطلب');
+            }
+
             let msg = "🏠 *طلب جديد من Food House*%0a";
+            msg += `📱 *رقم العميل:* ${phone}%0a`;
+            msg += `📍 *العنوان:* ${address}%0a`;
+            msg += "---------------------------%0a";
+            
             for (let name in cart) { msg += `• ${name} (x${cart[name].qty})%0a`; }
-            msg += `%0a💰 *الإجمالي:* ${total.toLocaleString()} د.ع`;
+            
+            msg += "---------------------------%0a";
+            msg += `💰 *الإجمالي:* ${total.toLocaleString()} د.ع`;
+            
             window.open(`https://wa.me/9647859674131?text=${msg}`);
         }
     </script>
